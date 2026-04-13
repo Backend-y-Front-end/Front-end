@@ -329,7 +329,7 @@ const Checkout = () => {
                 className="w-full py-4 rounded-xl font-bold text-white transition-all"
                 style={{ background: 'var(--gradient-fire)' }}
               >
-                FINALIZAR PEDIDO 🪵
+                FINALIZAR PEDIDO 
               </button>
 
               <button

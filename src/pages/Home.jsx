@@ -229,7 +229,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: "🪵", title: "100% Artesanal", desc: "Preparados con recetas tradicionales" },
+              { icon: "", title: "100% Artesanal", desc: "Preparados con recetas tradicionales" },
               { icon: "🔥", title: "Siempre Frescos", desc: "Hechos al momento para ti" },
               { icon: "🚴", title: "Envío Rápido", desc: "Entrega de 7am a 2pm" }
             ].map((item, i) => (

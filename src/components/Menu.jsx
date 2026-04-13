@@ -214,7 +214,7 @@ const Menu = () => {
         style={{ background: 'var(--gradient-wood)' }}
       >
         <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-          Menú Leños 🪵
+          Menú Leños 
         </h1>
         <p className="text-white/70">El sabor artesanal en tu mesa</p>
       </div>
@@ -324,7 +324,7 @@ const Menu = () => {
                       className="w-full py-3 rounded-xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
                       style={{ background: 'var(--gradient-fire)' }}
                     >
-                      Agregar 🪵
+                      Agregar 
                     </button>
                   </div>
                 </div>
