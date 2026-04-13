@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
 import clienteAxios from "../api/axios";
 
 const Register = () => {
@@ -55,147 +55,170 @@ const Register = () => {
     }
   };
 
+  const inputStyle = {
+    background: 'var(--bg-input)',
+    border: '2px solid var(--border)',
+    color: 'var(--text-primary)'
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDF6E3] px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#8B4513] flex items-center justify-center shadow-lg">
-            <span className="text-4xl">🪵</span>
-          </div>
-          <h1 className="text-2xl font-black text-[#5D3A1A] uppercase tracking-wide">
-            Únete a nosotros
-          </h1>
-          <p className="text-[#8B6914] text-sm mt-1">
-            Crea tu cuenta en segundos
-          </p>
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 py-8"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      <div 
+        className="w-full max-w-md animate-fadeIn"
+        style={{ 
+          background: 'var(--bg-card)', 
+          borderRadius: '24px',
+          boxShadow: 'var(--shadow-lg)',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Header */}
+        <div 
+          className="p-8 text-center"
+          style={{ background: 'var(--gradient-wood)' }}
+        >
+          <div className="text-6xl mb-4 animate-float">🔥</div>
+          <h1 className="text-2xl font-bold text-white mb-2">Únete a nosotros</h1>
+          <p className="text-white/70">Crea tu cuenta en segundos</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-3xl shadow-xl p-8 border-t-4 border-[#8B4513]"
-        >
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="p-8 space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+            <div 
+              className="p-4 rounded-xl text-center font-medium animate-fadeIn"
+              style={{ background: 'var(--error)', color: 'white' }}
+            >
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-[#5D3A1A] mb-2">
-                Nombre completo
-              </label>
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Nombre completo
+            </label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 rounded-xl font-medium outline-none"
+              style={inputStyle}
+              placeholder="Tu nombre"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 rounded-xl font-medium outline-none"
+              style={inputStyle}
+              placeholder="6141234567"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl font-medium outline-none"
+              style={inputStyle}
+              placeholder="tu@correo.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Contraseña
+            </label>
+            <div className="relative">
               <input
-                type="text"
-                name="nombre"
-                value={formData.nombre}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-[#E8D5B7] rounded-xl focus:ring-2 focus:ring-[#8B4513] focus:border-[#8B4513] transition-all bg-[#FFFDF7]"
-                placeholder="Tu nombre"
+                minLength={6}
+                className="w-full px-4 py-3 rounded-xl font-medium outline-none pr-12"
+                style={inputStyle}
+                placeholder="Mínimo 6 caracteres"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-bold text-[#5D3A1A] mb-2">
-                Teléfono
-              </label>
-              <input
-                type="tel"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-[#E8D5B7] rounded-xl focus:ring-2 focus:ring-[#8B4513] focus:border-[#8B4513] transition-all bg-[#FFFDF7]"
-                placeholder="Ej: 6141234567"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Confirmar contraseña
+            </label>
+            <input
+              type="password"
+              name="confirmarPassword"
+              value={formData.confirmarPassword}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 rounded-xl font-medium outline-none"
+              style={inputStyle}
+              placeholder="Repite tu contraseña"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-bold text-[#5D3A1A] mb-2">
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                name="correo"
-                value={formData.correo}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-[#E8D5B7] rounded-xl focus:ring-2 focus:ring-[#8B4513] focus:border-[#8B4513] transition-all bg-[#FFFDF7]"
-                placeholder="tu@correo.com"
-              />
-            </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-xl font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 mt-6"
+            style={{ 
+              background: 'var(--gradient-fire)',
+              boxShadow: '0 4px 20px rgba(196, 92, 38, 0.4)'
+            }}
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              <>
+                <UserPlus size={20} />
+                Crear Cuenta
+              </>
+            )}
+          </button>
 
-            <div>
-              <label className="block text-sm font-bold text-[#5D3A1A] mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 border-2 border-[#E8D5B7] rounded-xl focus:ring-2 focus:ring-[#8B4513] focus:border-[#8B4513] transition-all pr-12 bg-[#FFFDF7]"
-                  placeholder="Mínimo 6 caracteres"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-[#8B6914] hover:text-[#5D3A1A]"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-[#5D3A1A] mb-2">
-                Confirmar contraseña
-              </label>
-              <input
-                type="password"
-                name="confirmarPassword"
-                value={formData.confirmarPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-[#E8D5B7] rounded-xl focus:ring-2 focus:ring-[#8B4513] focus:border-[#8B4513] transition-all bg-[#FFFDF7]"
-                placeholder="Repite tu contraseña"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#8B4513] text-white py-4 rounded-xl font-bold uppercase tracking-wide shadow-lg hover:bg-[#6B3410] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+          <div 
+            className="text-center pt-4"
+            style={{ borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}
+          >
+            ¿Ya tienes cuenta?{" "}
+            <Link 
+              to="/login" 
+              className="font-bold hover:underline"
+              style={{ color: 'var(--accent)' }}
             >
-              {loading ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                "Crear Cuenta"
-              )}
-            </button>
+              Inicia sesión
+            </Link>
           </div>
         </form>
-
-        <p className="text-center mt-6 text-[#7A6B5A]">
-          ¿Ya tienes cuenta?{" "}
-          <Link
-            to="/login"
-            className="text-[#8B4513] font-bold hover:text-[#5D3A1A]"
-          >
-            Inicia sesión
-          </Link>
-        </p>
-
-        <Link
-          to="/"
-          className="block text-center mt-4 text-[#8B6914] text-sm hover:text-[#5D3A1A]"
-        >
-          ← Volver al catálogo
-        </Link>
       </div>
     </div>
   );

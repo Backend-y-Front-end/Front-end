@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Upload, Plus, Loader2, Image } from "lucide-react";
 import clienteAxios from "../../api/axios";
 
 const InventarioEditor = ({ refresh }) => {
@@ -10,7 +11,7 @@ const InventarioEditor = ({ refresh }) => {
     precio: "",
     stock: "",
     descripcion: "",
-    categoria: "Dulce", // Valor por defecto
+    categoria: "Dulce",
   });
 
   useEffect(() => {
@@ -25,7 +26,7 @@ const InventarioEditor = ({ refresh }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return alert("Por favor selecciona una imagen");
+    if (!file) return alert("Selecciona una imagen");
 
     setLoading(true);
     const data = new FormData();
@@ -41,7 +42,7 @@ const InventarioEditor = ({ refresh }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("¡Leño guardado con éxito! 🪵🔥");
+      alert("¡Producto guardado! 🪵🔥");
       setFormData({
         nombre: "",
         precio: "",
@@ -53,115 +54,177 @@ const InventarioEditor = ({ refresh }) => {
       if (refresh) refresh();
     } catch (error) {
       console.error("Error al subir:", error);
-      alert("Error al guardar el producto");
+      alert("Error al guardar");
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle = {
+    background: 'var(--bg-input)',
+    border: '2px solid var(--border)',
+    color: 'var(--text-primary)'
+  };
+
+  const categorias = [
+    { value: "Dulce", emoji: "🍯" },
+    { value: "Salado", emoji: "🥓" },
+    { value: "Especial", emoji: "✨" },
+    { value: "Bebida", emoji: "🥤" },
+  ];
+
   return (
-    <div className="max-w-xl mx-auto bg-[#1e293b] p-8 rounded-3xl border border-slate-800 shadow-2xl text-white">
-      <h2 className="text-xl font-black uppercase italic mb-8 text-center text-cyan-400">
-        NUEVO PRODUCTO
-      </h2>
+    <div 
+      className="max-w-2xl mx-auto rounded-2xl overflow-hidden"
+      style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-lg)' }}
+    >
+      <div 
+        className="p-6"
+        style={{ background: 'var(--gradient-wood)' }}
+      >
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <Plus size={24} />
+          Nuevo Producto
+        </h2>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <input
-          className="w-full bg-[#0f172a] border border-slate-800 p-4 rounded-2xl outline-none focus:border-cyan-500"
-          placeholder="Nombre del Leño"
-          value={formData.nombre}
-          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-          required
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="number"
-            className="bg-[#0f172a] border border-slate-800 p-4 rounded-2xl outline-none focus:border-cyan-500"
-            placeholder="Precio"
-            value={formData.precio}
-            onChange={(e) =>
-              setFormData({ ...formData, precio: e.target.value })
-            }
-            required
-          />
-          <input
-            type="number"
-            className="bg-[#0f172a] border border-slate-800 p-4 rounded-2xl outline-none focus:border-cyan-500"
-            placeholder="Stock"
-            value={formData.stock}
-            onChange={(e) =>
-              setFormData({ ...formData, stock: e.target.value })
-            }
-            required
-          />
-        </div>
-
-        {/* --- NUEVO: SELECTOR DE CATEGORÍA --- */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-black uppercase text-slate-500 ml-2">
-            Categoría
+      <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        {/* Imagen Upload */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Imagen del producto
           </label>
-          <select
-            className="w-full bg-[#0f172a] border border-slate-800 p-4 rounded-2xl outline-none focus:border-cyan-500 appearance-none cursor-pointer"
-            value={formData.categoria}
-            onChange={(e) =>
-              setFormData({ ...formData, categoria: e.target.value })
-            }
-          >
-            <option value="Dulce">Dulce 🍯</option>
-            <option value="Salado">Salado 🥓</option>
-            <option value="Especial">Especial ✨</option>
-            <option value="Bebida">Bebida 🥤</option>
-          </select>
-        </div>
-
-        <textarea
-          className="w-full bg-[#0f172a] border border-slate-800 p-4 rounded-2xl h-24 outline-none focus:border-cyan-500 resize-none"
-          placeholder="Descripción..."
-          value={formData.descripcion}
-          onChange={(e) =>
-            setFormData({ ...formData, descripcion: e.target.value })
-          }
-        />
-
-        <div className="bg-[#0f172a] p-6 rounded-2xl border border-slate-800 text-center">
-          <input
-            type="file"
-            accept="image/*"
-            id="file-upload"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files[0]) setFile(e.target.files[0]);
+          <label 
+            className="flex flex-col items-center justify-center w-full h-48 rounded-xl cursor-pointer transition-all hover:scale-[1.01] overflow-hidden"
+            style={{ 
+              background: preview ? 'transparent' : 'var(--bg-secondary)',
+              border: '2px dashed var(--border)'
             }}
-          />
-          <label
-            htmlFor="file-upload"
-            className="bg-slate-800 hover:bg-slate-700 px-6 py-2 rounded-full cursor-pointer text-sm font-bold border border-slate-700 transition-all"
           >
-            {file ? "Cambiar Imagen" : "Seleccionar Foto"}
-          </label>
-
-          <div className="mt-4 flex justify-center">
             {preview ? (
-              <img
-                src={preview}
-                alt="Preview"
-                className="w-40 h-40 object-cover rounded-2xl border-2 border-cyan-500 shadow-lg"
-              />
+              <img src={preview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-40 h-40 rounded-2xl border-2 border-dashed border-slate-800 flex items-center justify-center text-slate-700">
-                <span>📸 Sin foto</span>
+              <div className="text-center p-4">
+                <Image size={40} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-2" />
+                <p className="font-medium" style={{ color: 'var(--text-muted)' }}>
+                  Haz clic para subir imagen
+                </p>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  JPG, PNG (max. 5MB)
+                </p>
               </div>
             )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        {/* Nombre */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Nombre del producto
+          </label>
+          <input
+            type="text"
+            value={formData.nombre}
+            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+            required
+            placeholder="Ej: Leño de Nutella"
+            className="w-full px-4 py-3 rounded-xl outline-none"
+            style={inputStyle}
+          />
+        </div>
+
+        {/* Precio y Stock */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Precio ($)
+            </label>
+            <input
+              type="number"
+              value={formData.precio}
+              onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+              required
+              placeholder="35"
+              className="w-full px-4 py-3 rounded-xl outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Stock inicial
+            </label>
+            <input
+              type="number"
+              value={formData.stock}
+              onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+              required
+              placeholder="50"
+              className="w-full px-4 py-3 rounded-xl outline-none"
+              style={inputStyle}
+            />
           </div>
         </div>
 
+        {/* Categoría */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Categoría
+          </label>
+          <div className="grid grid-cols-4 gap-2">
+            {categorias.map((cat) => (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, categoria: cat.value })}
+                className="p-3 rounded-xl text-center transition-all"
+                style={{ 
+                  background: formData.categoria === cat.value ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: formData.categoria === cat.value ? 'white' : 'var(--text-primary)'
+                }}
+              >
+                <div className="text-2xl">{cat.emoji}</div>
+                <div className="text-xs font-bold mt-1">{cat.value}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Descripción */}
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Descripción (opcional)
+          </label>
+          <textarea
+            value={formData.descripcion}
+            onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+            placeholder="Delicioso leño relleno de..."
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl outline-none resize-none"
+            style={inputStyle}
+          />
+        </div>
+
+        {/* Submit */}
         <button
+          type="submit"
           disabled={loading}
-          className="w-full bg-cyan-600 hover:bg-cyan-700 py-4 rounded-2xl font-black uppercase tracking-widest transition-all"
+          className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+          style={{ background: 'var(--gradient-fire)' }}
         >
-          {loading ? "GUARDANDO..." : "GUARDAR PRODUCTO"}
+          {loading ? (
+            <Loader2 className="animate-spin" size={20} />
+          ) : (
+            <>
+              <Upload size={20} />
+              Guardar Producto
+            </>
+          )}
         </button>
       </form>
     </div>

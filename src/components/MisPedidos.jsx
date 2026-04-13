@@ -5,31 +5,31 @@ import clienteAxios from "../api/axios";
 const ESTADOS = {
   recibido: {
     label: "Recibido",
-    color: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
+    color: "var(--warning)",
     icon: Clock,
     description: "Esperando confirmación ⏳",
   },
   confirmado: {
     label: "Confirmado",
-    color: "bg-blue-500/20 text-blue-600 border-blue-500/30",
+    color: "#3B82F6",
     icon: Package,
     description: "En preparación 📦",
   },
   enCamino: {
     label: "En Camino",
-    color: "bg-[#8B4513]/20 text-[#8B4513] border-[#8B4513]/30",
+    color: "var(--accent)",
     icon: Truck,
     description: "Tu pedido va en camino 🚴",
   },
   entregado: {
     label: "Entregado",
-    color: "bg-green-500/20 text-green-600 border-green-500/30",
+    color: "var(--success)",
     icon: CheckCircle,
     description: "¡Entregado! ✅",
   },
   cancelado: {
     label: "Cancelado",
-    color: "bg-red-500/20 text-red-600 border-red-500/30",
+    color: "var(--error)",
     icon: XCircle,
     description: "Pedido cancelado ❌",
   },
@@ -56,116 +56,119 @@ const MisPedidos = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDF6E3] flex items-center justify-center">
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--bg-primary)' }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B4513] mx-auto"></div>
-          <p className="mt-4 text-[#8B6914] font-bold">
-            Cargando tus pedidos...
-          </p>
+          <div className="text-5xl animate-float mb-4">🪵</div>
+          <p style={{ color: 'var(--text-muted)' }}>Cargando tus pedidos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF6E3] pb-24 p-4">
+    <div 
+      className="min-h-screen py-8 px-4"
+      style={{ background: 'var(--bg-primary)' }}
+    >
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-3xl font-black italic mb-8 text-center uppercase text-[#5D3A1A]">
-          Mis <span className="text-[#8B4513]">Pedidos</span>
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Mis Pedidos
         </h2>
 
         {pedidos.length === 0 ? (
-          <div className="bg-white p-12 rounded-3xl shadow-md text-center border border-[#E8D5B7]">
-            <Package size={48} className="mx-auto text-[#D4A574] mb-4" />
-            <p className="text-[#5D3A1A] font-bold">No tienes pedidos aún</p>
-            <p className="text-[#8B6914] text-sm mt-2">
+          <div 
+            className="text-center py-16 rounded-2xl"
+            style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow)' }}
+          >
+            <div className="text-6xl mb-4">📦</div>
+            <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+              No tienes pedidos aún
+            </p>
+            <p style={{ color: 'var(--text-muted)' }}>
               ¡Haz tu primer pedido de Leños Rellenos!
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {pedidos.map((p) => {
               const estadoConfig = ESTADOS[p.estado] || ESTADOS.recibido;
               const IconEstado = estadoConfig.icon;
+              const estadoIndex = ["recibido", "confirmado", "enCamino", "entregado"].indexOf(p.estado);
 
               return (
                 <div
                   key={p._id}
-                  className="bg-white p-6 rounded-3xl shadow-md border-l-8 border-[#8B4513] relative overflow-hidden"
+                  className="rounded-2xl overflow-hidden animate-fadeIn"
+                  style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow)' }}
                 >
-                  {/* FOLIO */}
-                  <div className="absolute top-4 right-4 font-mono font-black text-[#8B4513] text-lg">
-                    {p.folio}
-                  </div>
-
-                  {/* ESTADO CON COLOR */}
-                  <div className="mb-4">
-                    <p className="text-xs text-[#8B6914] uppercase font-bold mb-2">
-                      Estado:
-                    </p>
-                    <div
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase border ${estadoConfig.color}`}
-                    >
-                      <IconEstado size={14} />
-                      {estadoConfig.description}
+                  <div className="p-5">
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Folio</p>
+                        <p className="text-xl font-black" style={{ color: 'var(--accent)' }}>
+                          {p.folio}
+                        </p>
+                      </div>
+                      <div 
+                        className="px-3 py-2 rounded-xl flex items-center gap-2"
+                        style={{ background: `${estadoConfig.color}20`, color: estadoConfig.color }}
+                      >
+                        <IconEstado size={16} />
+                        <span className="text-sm font-bold">{estadoConfig.description}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* BARRA DE PROGRESO VISUAL */}
-                  <div className="flex items-center gap-1 mb-4">
-                    {["recibido", "confirmado", "enCamino", "entregado"].map(
-                      (estado, idx) => (
+                    {/* Progress Bar */}
+                    <div className="flex gap-1 mb-4">
+                      {["recibido", "confirmado", "enCamino", "entregado"].map((estado, idx) => (
                         <div
                           key={estado}
-                          className={`h-2 flex-1 rounded-full transition-all ${
-                            [
-                              "recibido",
-                              "confirmado",
-                              "enCamino",
-                              "entregado",
-                            ].indexOf(p.estado) >= idx
-                              ? p.estado === "cancelado"
-                                ? "bg-red-500"
-                                : "bg-[#8B4513]"
-                              : "bg-[#E8D5B7]"
-                          }`}
+                          className="flex-1 h-2 rounded-full transition-all"
+                          style={{
+                            background: estadoIndex >= idx
+                              ? p.estado === "cancelado" ? 'var(--error)' : 'var(--accent)'
+                              : 'var(--border)'
+                          }}
                         />
-                      ),
-                    )}
-                  </div>
-
-                  {/* PRODUCTOS */}
-                  <div className="border-t border-[#E8D5B7] pt-4">
-                    <p className="text-[10px] text-[#8B6914] uppercase font-bold mb-2">
-                      Productos:
-                    </p>
-                    {p.productos.map((prod, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center py-1"
-                      >
-                        <span className="text-sm font-medium text-[#5D3A1A]">
-                          {prod.nombre}
-                        </span>
-                        <span className="text-sm font-bold text-[#8B6914]">
-                          x{prod.cantidad}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* TOTAL Y FECHA */}
-                  <div className="mt-4 pt-4 border-t border-[#E8D5B7] flex justify-between items-center">
-                    <div className="text-xs text-[#8B6914]">
-                      {new Date(p.fechaPedido).toLocaleDateString("es-MX", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      ))}
                     </div>
-                    <p className="font-black text-xl text-[#5D3A1A]">
-                      ${p.total}.00
-                    </p>
+
+                    {/* Productos */}
+                    <div 
+                      className="p-3 rounded-xl mb-4"
+                      style={{ background: 'var(--bg-secondary)' }}
+                    >
+                      {p.productos.map((prod, idx) => (
+                        <div 
+                          key={idx} 
+                          className="flex justify-between py-1"
+                        >
+                          <span style={{ color: 'var(--text-secondary)' }}>{prod.nombre}</span>
+                          <span className="font-bold" style={{ color: 'var(--text-primary)' }}>x{prod.cantidad}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(p.fechaPedido).toLocaleDateString("es-MX", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <span className="text-xl font-black" style={{ color: 'var(--accent)' }}>
+                        ${p.total}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );

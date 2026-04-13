@@ -1,7 +1,5 @@
-﻿
-
-import React, { useState, useEffect } from "react";
-import { Eye, X, Check, Phone, Send, Clock, Truck, Package, CheckCircle } from "lucide-react";
+﻿import { useState, useEffect } from "react";
+import { Eye, X, Check, Phone, Send, Clock, Truck, Package, CheckCircle, AlertCircle } from "lucide-react";
 import clienteAxios from "../../api/axios";
 
 const PedidosManager = () => {
@@ -19,17 +17,18 @@ const PedidosManager = () => {
   const fetchPedidos = async () => {
     try {
       setLoading(true);
-      
       const resPending = await clienteAxios.get("/api/admin/pending");
       const todosPendientes = Array.isArray(resPending.data) ? resPending.data : [];
-      
+
       setPedidosPendientes(todosPendientes.filter(p => p.estado === "recibido"));
       setPedidosPorEnviar(todosPendientes.filter(p => p.estado === "confirmado"));
-      
-      const resEnviados = await clienteAxios.get("/api/admin/enviados");
-      const todosEnviados = Array.isArray(resEnviados.data) ? resEnviados.data : [];
-      setPedidosEnviados(todosEnviados);
-      
+
+      try {
+        const resEnviados = await clienteAxios.get("/api/admin/enviados");
+        setPedidosEnviados(Array.isArray(resEnviados.data) ? resEnviados.data : []);
+      } catch {
+        setPedidosEnviados([]);
+      }
     } catch (err) {
       console.error("Error al conectar:", err);
     } finally {
@@ -41,327 +40,353 @@ const PedidosManager = () => {
     if (!pedidoSeleccionado) return;
     try {
       const res = await clienteAxios.put(`/api/admin/accept/${pedidoSeleccionado._id}`);
-      if (res.data.whatsappUrl) {
-        window.open(res.data.whatsappUrl, "_blank");
-      }
-      alert("Pedido validado. Se notificó al cliente por WhatsApp.");
+      if (res.data.whatsappUrl) window.open(res.data.whatsappUrl, "_blank");
+      alert("Pedido validado ✅");
       setPedidoSeleccionado(null);
       fetchPedidos();
     } catch (err) {
-      console.error("Error al validar:", err);
-      alert("No se pudo validar el pedido.");
+      alert("Error al validar");
     }
   };
 
   const handleEnviar = async (pedido) => {
-    if (!window.confirm(`Confirmar envio del pedido ${pedido.folio}?`)) return;
+    if (!window.confirm(`¿Confirmar envío del pedido ${pedido.folio}?`)) return;
     try {
       const res = await clienteAxios.put(`/api/admin/complete/${pedido._id}`);
-      if (res.data.whatsappUrl) {
-        window.open(res.data.whatsappUrl, "_blank");
-      }
-      alert("Pedido enviado. Se notificó al cliente por WhatsApp.");
+      if (res.data.whatsappUrl) window.open(res.data.whatsappUrl, "_blank");
+      alert("Pedido enviado 🚴");
       fetchPedidos();
     } catch (err) {
-      console.error("Error al enviar:", err);
-      alert("Error al marcar como enviado.");
+      alert("Error al enviar");
     }
   };
 
   const handleEntregar = async (pedido) => {
-    if (!window.confirm(`Confirmar entrega del pedido ${pedido.folio}?`)) return;
+    if (!window.confirm(`¿Confirmar entrega del pedido ${pedido.folio}?`)) return;
     try {
       const res = await clienteAxios.put(`/api/admin/deliver/${pedido._id}`);
-      if (res.data.whatsappUrl) {
-        window.open(res.data.whatsappUrl, "_blank");
-      }
-      alert("Pedido entregado exitosamente.");
+      if (res.data.whatsappUrl) window.open(res.data.whatsappUrl, "_blank");
+      alert("Pedido entregado ✅");
       fetchPedidos();
     } catch (err) {
-      console.error("Error al entregar:", err);
-      alert("Error al marcar como entregado.");
+      alert("Error al entregar");
     }
   };
 
   const handleRechazar = async (id) => {
-    if (!window.confirm("Estas seguro de rechazar este pedido?")) return;
+    if (!window.confirm("¿Rechazar este pedido?")) return;
     try {
       await clienteAxios.put(`/api/admin/reject/${id}`);
       setPedidoSeleccionado(null);
       fetchPedidos();
-      alert("Pedido rechazado.");
+      alert("Pedido rechazado");
     } catch (err) {
-      alert("No se pudo rechazar el pedido.");
+      alert("Error al rechazar");
     }
   };
 
+  const tabs = [
+    { id: "pendientes", label: "Pendientes", count: pedidosPendientes.length, icon: Clock, color: "var(--warning)" },
+    { id: "porEnviar", label: "Por Enviar", count: pedidosPorEnviar.length, icon: Package, color: "var(--success)" },
+    { id: "porEntregar", label: "En Camino", count: pedidosEnviados.length, icon: Truck, color: "var(--accent)" },
+  ];
+
   if (loading) {
     return (
-      <div className="p-20 text-center font-black animate-pulse text-cyan-400">
-        CARGANDO PEDIDOS...
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="text-5xl animate-float mb-4">📦</div>
+          <p style={{ color: 'var(--text-muted)' }}>Cargando pedidos...</p>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex gap-2 bg-[#1e293b] p-2 rounded-2xl overflow-x-auto">
-        <button
-          onClick={() => setTab("pendientes")}
-          className={`flex-1 py-3 px-2 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-1 transition-all whitespace-nowrap ${
-            tab === "pendientes"
-              ? "bg-yellow-500 text-black"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Clock size={16} />
-          Pendientes ({pedidosPendientes.length})
-        </button>
-        <button
-          onClick={() => setTab("porEnviar")}
-          className={`flex-1 py-3 px-2 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-1 transition-all whitespace-nowrap ${
-            tab === "porEnviar"
-              ? "bg-green-500 text-black"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Truck size={16} />
-          Por Enviar ({pedidosPorEnviar.length})
-        </button>
-        <button
-          onClick={() => setTab("porEntregar")}
-          className={`flex-1 py-3 px-2 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-1 transition-all whitespace-nowrap ${
-            tab === "porEntregar"
-              ? "bg-cyan-500 text-black"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Package size={16} />
-          Por Entregar ({pedidosEnviados.length})
-        </button>
+  const PedidoCard = ({ pedido, estado, onAction, actionLabel, actionIcon: ActionIcon, actionColor }) => (
+    <div 
+      className="p-5 rounded-2xl transition-all hover:scale-[1.01]"
+      style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow)' }}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <span 
+            className="text-xs font-bold px-2 py-1 rounded-lg"
+            style={{ background: `${estado.color}20`, color: estado.color }}
+          >
+            {estado.label}
+          </span>
+          <p className="text-lg font-black mt-2" style={{ color: 'var(--accent)' }}>
+            {pedido.folio}
+          </p>
+        </div>
+        <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+          ${pedido.total}
+        </p>
       </div>
 
+      <div className="mb-4">
+        <p className="font-bold" style={{ color: 'var(--text-primary)' }}>
+          {pedido.clienteId?.nombre}
+        </p>
+        {pedido.direccion && (
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {pedido.direccion.calle}, {pedido.direccion.colonia}
+          </p>
+        )}
+        {pedido.clienteId?.telefono && (
+          <p className="text-sm flex items-center gap-1 mt-1" style={{ color: 'var(--text-muted)' }}>
+            <Phone size={12} />
+            {pedido.clienteId.telefono}
+          </p>
+        )}
+      </div>
+
+      <button
+        onClick={onAction}
+        className="w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+        style={{ background: actionColor }}
+      >
+        <ActionIcon size={18} />
+        {actionLabel}
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 pb-24 md:pb-0">
+      {/* Tabs */}
+      <div 
+        className="flex gap-2 p-2 rounded-2xl overflow-x-auto"
+        style={{ background: 'var(--bg-card)' }}
+      >
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all whitespace-nowrap"
+            style={{ 
+              background: tab === t.id ? t.color : 'transparent',
+              color: tab === t.id ? 'white' : 'var(--text-muted)'
+            }}
+          >
+            <t.icon size={18} />
+            {t.label}
+            <span 
+              className="px-2 py-0.5 rounded-full text-xs"
+              style={{ 
+                background: tab === t.id ? 'rgba(255,255,255,0.3)' : 'var(--bg-secondary)',
+                color: tab === t.id ? 'white' : 'var(--text-muted)'
+              }}
+            >
+              {t.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Pendientes */}
       {tab === "pendientes" && (
         <div className="space-y-4">
-          <div className="bg-[#1e293b] p-4 rounded-2xl border border-slate-800">
-            <h3 className="text-lg font-black text-yellow-400 uppercase flex items-center gap-2">
-              <Clock size={20} /> Pedidos por Validar
-            </h3>
-            <p className="text-slate-500 text-xs">Revisa los detalles y valida para confirmar</p>
-          </div>
-
           {pedidosPendientes.length === 0 ? (
-            <div className="bg-[#1e293b] p-16 rounded-2xl border-2 border-dashed border-slate-800 text-center">
-              <Clock size={48} className="mx-auto text-slate-700 mb-4" />
-              <p className="text-slate-500 font-bold uppercase">No hay pedidos pendientes</p>
+            <div 
+              className="text-center py-12 rounded-2xl"
+              style={{ background: 'var(--bg-card)' }}
+            >
+              <CheckCircle size={48} className="mx-auto mb-3" style={{ color: 'var(--success)' }} />
+              <p className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                No hay pedidos pendientes
+              </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pedidosPendientes.map((pedido) => (
-                <div
+                <PedidoCard
                   key={pedido._id}
-                  className="bg-[#1e293b] p-5 rounded-2xl border border-slate-800 flex justify-between items-center"
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded-full font-black uppercase">
-                        Pendiente
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 font-black">FOLIO: {pedido.folio}</p>
-                    <h3 className="font-bold text-white uppercase">{pedido.clienteId?.nombre}</h3>
-                    <p className="text-sm font-black text-green-500">${pedido.total}.00</p>
-                  </div>
-                  <button
-                    onClick={() => setPedidoSeleccionado(pedido)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-xl transition-all flex gap-2 items-center text-xs font-black uppercase"
-                  >
-                    <Eye size={16} /> Ver
-                  </button>
-                </div>
+                  pedido={pedido}
+                  estado={{ label: "Pendiente", color: "var(--warning)" }}
+                  onAction={() => setPedidoSeleccionado(pedido)}
+                  actionLabel="Ver Detalles"
+                  actionIcon={Eye}
+                  actionColor="var(--warning)"
+                />
               ))}
             </div>
           )}
         </div>
       )}
 
+      {/* Por Enviar */}
       {tab === "porEnviar" && (
         <div className="space-y-4">
-          <div className="bg-[#1e293b] p-4 rounded-2xl border border-slate-800">
-            <h3 className="text-lg font-black text-green-400 uppercase flex items-center gap-2">
-              <Truck size={20} /> Pedidos Listos para Enviar
-            </h3>
-            <p className="text-slate-500 text-xs">Haz clic en Enviar para notificar al cliente</p>
-          </div>
-
           {pedidosPorEnviar.length === 0 ? (
-            <div className="bg-[#1e293b] p-16 rounded-2xl border-2 border-dashed border-slate-800 text-center">
-              <Truck size={48} className="mx-auto text-slate-700 mb-4" />
-              <p className="text-slate-500 font-bold uppercase">No hay pedidos por enviar</p>
+            <div 
+              className="text-center py-12 rounded-2xl"
+              style={{ background: 'var(--bg-card)' }}
+            >
+              <Package size={48} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                No hay pedidos por enviar
+              </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pedidosPorEnviar.map((pedido) => (
-                <div
+                <PedidoCard
                   key={pedido._id}
-                  className="bg-[#1e293b] p-5 rounded-2xl border border-green-500/30 flex justify-between items-center"
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-black uppercase">
-                        Validado
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 font-black">FOLIO: {pedido.folio}</p>
-                    <h3 className="font-bold text-white uppercase">{pedido.clienteId?.nombre}</h3>
-                    <p className="text-xs text-slate-400">
-                      {pedido.direccion?.calle}, {pedido.direccion?.colonia}
-                    </p>
-                    <p className="text-sm font-black text-green-500 mt-1">${pedido.total}.00</p>
-                  </div>
-                  <button
-                    onClick={() => handleEnviar(pedido)}
-                    className="bg-green-500 hover:bg-green-600 text-black px-5 py-3 rounded-xl transition-all flex gap-2 items-center text-xs font-black uppercase shadow-lg shadow-green-900/30"
-                  >
-                    <Send size={16} /> Enviar
-                  </button>
-                </div>
+                  pedido={pedido}
+                  estado={{ label: "Validado", color: "var(--success)" }}
+                  onAction={() => handleEnviar(pedido)}
+                  actionLabel="Marcar Enviado"
+                  actionIcon={Send}
+                  actionColor="var(--success)"
+                />
               ))}
             </div>
           )}
         </div>
       )}
 
+      {/* Por Entregar */}
       {tab === "porEntregar" && (
         <div className="space-y-4">
-          <div className="bg-[#1e293b] p-4 rounded-2xl border border-slate-800">
-            <h3 className="text-lg font-black text-cyan-400 uppercase flex items-center gap-2">
-              <Package size={20} /> Pedidos por Confirmar Entrega
-            </h3>
-            <p className="text-slate-500 text-xs">Marca como Entregado cuando el cliente reciba su pedido</p>
-          </div>
-
           {pedidosEnviados.length === 0 ? (
-            <div className="bg-[#1e293b] p-16 rounded-2xl border-2 border-dashed border-slate-800 text-center">
-              <Package size={48} className="mx-auto text-slate-700 mb-4" />
-              <p className="text-slate-500 font-bold uppercase">No hay pedidos en camino</p>
+            <div 
+              className="text-center py-12 rounded-2xl"
+              style={{ background: 'var(--bg-card)' }}
+            >
+              <Truck size={48} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                No hay pedidos en camino
+              </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pedidosEnviados.map((pedido) => (
-                <div
+                <PedidoCard
                   key={pedido._id}
-                  className="bg-[#1e293b] p-5 rounded-2xl border border-cyan-500/30 flex justify-between items-center"
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-cyan-500/20 text-cyan-400 text-[10px] px-2 py-0.5 rounded-full font-black uppercase animate-pulse">
-                        En Camino
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 font-black">FOLIO: {pedido.folio}</p>
-                    <h3 className="font-bold text-white uppercase">{pedido.clienteId?.nombre}</h3>
-                    <p className="text-xs text-slate-400 flex items-center gap-1">
-                      <Phone size={12} className="text-green-500" />
-                      {pedido.clienteId?.telefono}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      {pedido.direccion?.calle}, {pedido.direccion?.colonia}
-                    </p>
-                    <p className="text-sm font-black text-green-500 mt-1">${pedido.total}.00</p>
-                  </div>
-                  <button
-                    onClick={() => handleEntregar(pedido)}
-                    className="bg-cyan-500 hover:bg-cyan-600 text-black px-5 py-3 rounded-xl transition-all flex gap-2 items-center text-xs font-black uppercase shadow-lg shadow-cyan-900/30"
-                  >
-                    <CheckCircle size={16} /> Entregado
-                  </button>
-                </div>
+                  pedido={pedido}
+                  estado={{ label: "En Camino", color: "var(--accent)" }}
+                  onAction={() => handleEntregar(pedido)}
+                  actionLabel="Confirmar Entrega"
+                  actionIcon={CheckCircle}
+                  actionColor="var(--accent)"
+                />
               ))}
             </div>
           )}
         </div>
       )}
 
+      {/* Modal Detalle */}
       {pedidoSeleccionado && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1e293b] border border-slate-700 w-full max-w-md rounded-3xl p-6 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setPedidoSeleccionado(null)}
-              className="absolute top-4 right-4 text-slate-500 hover:text-white"
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+        >
+          <div 
+            className="w-full max-w-md rounded-2xl overflow-hidden animate-fadeIn"
+            style={{ background: 'var(--bg-card)', maxHeight: '90vh', overflowY: 'auto' }}
+          >
+            <div 
+              className="p-6 flex justify-between items-center"
+              style={{ background: 'var(--gradient-wood)' }}
             >
-              <X size={20} />
-            </button>
-
-            <h2 className="text-xl font-black uppercase italic mb-4 text-cyan-400 text-center">
-              Detalle del Pedido
-            </h2>
-
-            <div className="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-2xl mb-4 text-center">
-              <p className="text-[10px] text-yellow-400 uppercase font-black">Folio</p>
-              <p className="text-2xl font-black text-yellow-400">{pedidoSeleccionado.folio}</p>
+              <h2 className="text-xl font-bold text-white">Detalle del Pedido</h2>
+              <button
+                onClick={() => setPedidoSeleccionado(null)}
+                className="p-2 rounded-full"
+                style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div className="bg-[#0f172a] p-4 rounded-2xl border border-slate-800 mb-4 space-y-3">
-              <div className="border-b border-slate-800 pb-3">
-                <p className="text-[10px] uppercase text-slate-500 font-black">Cliente:</p>
-                <p className="text-sm text-white font-bold uppercase">
+            <div className="p-6 space-y-4">
+              <div 
+                className="text-center p-4 rounded-xl"
+                style={{ background: 'var(--bg-secondary)' }}
+              >
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Folio</p>
+                <p className="text-2xl font-black" style={{ color: 'var(--accent)' }}>
+                  {pedidoSeleccionado.folio}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-muted)' }}>Cliente</p>
+                <p className="font-bold" style={{ color: 'var(--text-primary)' }}>
                   {pedidoSeleccionado.clienteId?.nombre}
                 </p>
-                <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                  <Phone size={12} className="text-green-500" />
+                <p className="text-sm flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                  <Phone size={14} />
                   {pedidoSeleccionado.clienteId?.telefono}
                 </p>
               </div>
 
-              <div className="border-b border-slate-800 pb-3">
-                <p className="text-[10px] uppercase text-slate-500 font-black">Direccion:</p>
-                <p className="text-sm text-slate-300">
+              <div>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-muted)' }}>Dirección</p>
+                <p style={{ color: 'var(--text-primary)' }}>
                   {pedidoSeleccionado.direccion?.calle}, {pedidoSeleccionado.direccion?.colonia}
                 </p>
                 {pedidoSeleccionado.direccion?.referencia && (
-                  <p className="text-xs text-cyan-400 italic">
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                     Ref: {pedidoSeleccionado.direccion.referencia}
                   </p>
                 )}
               </div>
 
               <div>
-                <p className="text-[10px] uppercase text-slate-500 font-black mb-2">Productos:</p>
-                {pedidoSeleccionado.productos?.map((p, idx) => (
-                  <div key={idx} className="flex justify-between items-center bg-slate-900/50 p-2 rounded-lg mb-1">
-                    <span className="text-xs text-white uppercase font-bold">{p.nombre}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs bg-cyan-600/20 text-cyan-500 px-2 py-0.5 rounded font-black">
-                        x{p.cantidad}
-                      </span>
-                      <span className="text-xs text-green-400 font-bold">
-                        ${p.subtotal || p.precioUnitario * p.cantidad}
-                      </span>
+                <p className="text-sm font-bold mb-2" style={{ color: 'var(--text-muted)' }}>Productos</p>
+                <div 
+                  className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--bg-secondary)' }}
+                >
+                  {pedidoSeleccionado.productos?.map((p, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex justify-between p-3"
+                      style={{ borderBottom: idx < pedidoSeleccionado.productos.length - 1 ? '1px solid var(--border)' : 'none' }}
+                    >
+                      <span style={{ color: 'var(--text-primary)' }}>{p.nombre}</span>
+                      <div className="text-right">
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>x{p.cantidad}</span>
+                        <span className="ml-3 font-bold" style={{ color: 'var(--accent)' }}>
+                          ${p.subtotal || p.precioUnitario * p.cantidad}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
-                <span className="text-sm uppercase text-slate-400 font-black">Total:</span>
-                <span className="text-xl text-green-500 font-black">${pedidoSeleccionado.total}.00</span>
+              <div className="flex justify-between items-center pt-2">
+                <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Total:</span>
+                <span className="text-2xl font-black" style={{ color: 'var(--accent)' }}>
+                  ${pedidoSeleccionado.total}
+                </span>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleRechazar(pedidoSeleccionado._id)}
-                className="bg-red-600/10 text-red-500 border border-red-600/20 py-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-600 hover:text-white transition-all"
-              >
-                Rechazar
-              </button>
-              <button
-                onClick={handleValidar}
-                className="bg-green-500 text-black py-4 rounded-xl font-black uppercase text-[10px] hover:bg-green-600 transition-all shadow-lg flex items-center justify-center gap-2"
-              >
-                <Check size={16} /> Validar
-              </button>
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                <button
+                  onClick={() => handleRechazar(pedidoSeleccionado._id)}
+                  className="py-4 rounded-xl font-bold transition-all"
+                  style={{ 
+                    background: 'var(--bg-secondary)', 
+                    color: 'var(--error)',
+                    border: '2px solid var(--error)'
+                  }}
+                >
+                  Rechazar
+                </button>
+                <button
+                  onClick={handleValidar}
+                  className="py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2"
+                  style={{ background: 'var(--success)' }}
+                >
+                  <Check size={18} />
+                  Validar
+                </button>
+              </div>
             </div>
           </div>
         </div>

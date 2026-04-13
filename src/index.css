@@ -1,113 +1,126 @@
 @import "tailwindcss";
 
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* 🌞 MODO CLARO - Rústico Cálido */
+  --bg-primary: #FDF6E9;
+  --bg-secondary: #F5E6D3;
+  --bg-card: #FFFFFF;
+  --bg-input: #FFFBF5;
+  
+  --text-primary: #2D1810;
+  --text-secondary: #5C4033;
+  --text-muted: #8B7355;
+  
+  --accent: #C45C26;
+  --accent-hover: #A34A1E;
+  --accent-light: #F4A460;
+  
+  --border: #E8D5C4;
+  --border-focus: #C45C26;
+  
+  --success: #4A7C4E;
+  --warning: #D4A026;
+  --error: #B33A3A;
+  
+  --shadow: 0 4px 20px rgba(45, 24, 16, 0.08);
+  --shadow-lg: 0 8px 40px rgba(45, 24, 16, 0.12);
+  
+  --gradient-fire: linear-gradient(135deg, #C45C26 0%, #E07830 50%, #F4A460 100%);
+  --gradient-wood: linear-gradient(180deg, #8B5A2B 0%, #5C4033 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+[data-theme="dark"] {
+  /* 🌙 MODO OSCURO - Carbón y Fuego */
+  --bg-primary: #1A1412;
+  --bg-secondary: #231C18;
+  --bg-card: #2D2420;
+  --bg-input: #352C26;
+  
+  --text-primary: #F5E6D3;
+  --text-secondary: #C9B8A8;
+  --text-muted: #8B7B6B;
+  
+  --accent: #E8923A;
+  --accent-hover: #F4A460;
+  --accent-light: #C45C26;
+  
+  --border: #3D342E;
+  --border-focus: #E8923A;
+  
+  --success: #6B9E6F;
+  --warning: #E8B84A;
+  --error: #D45555;
+  
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+  
+  --gradient-fire: linear-gradient(135deg, #E8923A 0%, #F4A460 50%, #FFD700 100%);
+  --gradient-wood: linear-gradient(180deg, #5C4033 0%, #2D1810 100%);
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
   margin: 0;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  min-height: 100vh;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
   border-radius: 4px;
-  color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(196, 92, 38, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(196, 92, 38, 0.6); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Textura de madera sutil */
+.wood-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='none'/%3E%3Cpath d='M0 50c20-5 40 5 60 0s40 5 60-5' stroke='%238B5A2B' stroke-width='0.5' fill='none' opacity='0.1'/%3E%3C/svg%3E");
 }

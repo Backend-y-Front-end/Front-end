@@ -4,10 +4,13 @@ import Sidebar from "../components/admin/Sidebar";
 import PedidosManager from "../components/admin/PedidosManager";
 import InventarioEditor from "../components/admin/InventarioEditor";
 import CatalogoStock from "../components/admin/CatalogoStock";
+import { useTheme } from "../context/ThemeContext";
+import { Sun, Moon } from "lucide-react";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("pedidos");
   const [inventario, setInventario] = useState([]);
+  const { theme, toggleTheme } = useTheme();
 
   const fetchInventario = async () => {
     try {
@@ -23,29 +26,55 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#0f172a] text-gray-100">
+    <div 
+      className="min-h-screen flex"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      {/* Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="flex-1 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto animate-in fade-in duration-300">
-          {/* 1. PEDIDOS */}
+      {/* Main Content */}
+      <div className="flex-1 p-4 md:p-8 overflow-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 
+              className="text-2xl md:text-3xl font-black"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Panel de Administración
+            </h1>
+            <p style={{ color: 'var(--text-muted)' }}>
+              Gestiona tu negocio desde aquí
+            </p>
+          </div>
+          
+          <button
+            onClick={toggleTheme}
+            className="p-3 rounded-xl transition-all hover:scale-110"
+            style={{ 
+              background: 'var(--bg-card)', 
+              color: 'var(--accent)',
+              boxShadow: 'var(--shadow)'
+            }}
+          >
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="animate-fadeIn">
           {activeTab === "pedidos" && <PedidosManager />}
 
-          {/* 2. CATÁLOGO */}
           {activeTab === "catalogo" && (
-            <CatalogoStock productos={inventario} refresh={fetchInventario} />
+            <InventarioEditor refresh={fetchInventario} />
           )}
 
-          {/* 3. GESTIÓN DE STOCK */}
           {activeTab === "stock" && (
-            <div className="flex justify-center items-start animate-in zoom-in duration-300">
-              <div className="w-full max-w-2xl">
-                <InventarioEditor refresh={fetchInventario} />
-              </div>
-            </div>
+            <CatalogoStock productos={inventario} refresh={fetchInventario} />
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };
