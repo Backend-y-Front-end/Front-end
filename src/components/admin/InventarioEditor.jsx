@@ -25,40 +25,63 @@ const InventarioEditor = ({ refresh }) => {
   }, [file]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) return alert("Selecciona una imagen");
-
-    setLoading(true);
-    const data = new FormData();
-    data.append("imagen", file);
-    data.append("nombre", formData.nombre);
-    data.append("precio", formData.precio);
-    data.append("stock", formData.stock);
-    data.append("descripcion", formData.descripcion);
-    data.append("categoria", formData.categoria);
-
-    try {
-      await clienteAxios.post("/api/products", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      alert("¡Producto guardado! 🪵🔥");
-      setFormData({
-        nombre: "",
-        precio: "",
-        stock: "",
-        descripcion: "",
-        categoria: "Dulce",
-      });
-      setFile(null);
-      if (refresh) refresh();
-    } catch (error) {
-      console.error("Error al subir:", error);
-      alert("Error al guardar");
-    } finally {
-      setLoading(false);
+  e.preventDefault();
+  
+  // Verificar autenticación antes de enviar
+  const token = localStorage.getItem("token");
+  const userStr = localStorage.getItem("user");
+  
+  if (!token) {
+    alert("❌ No estás autenticado. Por favor inicia sesión.");
+    return;
+  }
+  
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    if (user.rol !== "admin") {
+      alert("❌ No tienes permisos de administrador.");
+      return;
     }
-  };
+  }
+
+  if (!file) return alert("Selecciona una imagen");
+
+  setLoading(true);
+  const data = new FormData();
+  data.append("imagen", file);
+  data.append("nombre", formData.nombre);
+  data.append("precio", formData.precio);
+  data.append("stock", formData.stock);
+  data.append("descripcion", formData.descripcion);
+  data.append("categoria", formData.categoria);
+
+  try {
+    await clienteAxios.post("/api/products", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    alert("¡Producto guardado! 🪵🔥");
+    setFormData({
+      nombre: "",
+      precio: "",
+      stock: "",
+      descripcion: "",
+      categoria: "Dulce",
+    });
+    setFile(null);
+    if (refresh) refresh();
+  } catch (error) {
+    console.error("Error al subir:", error);
+    if (error.response?.status === 401) {
+      alert("❌ Sesión expirada. Por favor inicia sesión de nuevo.");
+    } else if (error.response?.status === 403) {
+      alert("❌ No tienes permisos de administrador.");
+    } else {
+      alert("Error al guardar: " + (error.response?.data?.message || error.message));
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const inputStyle = {
     background: 'var(--bg-input)',
